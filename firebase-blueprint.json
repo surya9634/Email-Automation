@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "founder": {
+      "title": "Founder",
+      "description": "Represents a target founder for outreaching.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "company": { "type": "string" },
+        "sector": { "type": "string" },
+        "context": { "type": "string" },
+        "email": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["Draft", "Generated", "Sent", "Replied"]
+        },
+        "personalizedSubject": { "type": "string" },
+        "personalizedEmail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "company", "email", "status"]
+    },
+    "profile": {
+      "title": "User Profile",
+      "description": "Radhey's background and default pitching guidelines.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "bio": { "type": "string" },
+        "experience": { "type": "string" },
+        "additionalContext": { "type": "string" },
+        "emailSignature": { "type": "string" }
+      },
+      "required": ["name", "bio"]
+    }
+  },
+  "firestore": {
+    "/founders/{founderId}": {
+      "schema": "founder",
+      "description": "Collection of target founders."
+    },
+    "/profile/config": {
+      "schema": "profile",
+      "description": "Single document holding the user's pitching profile."
+    }
+  }
+}

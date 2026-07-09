@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Founder Outreach and Personalization Engine</title>
+    <script>
+      // Support blocking/monkey-patching WebSocket connections that are bound to fail in our container environment.
+      (function() {
+        const OriginalWebSocket = window.WebSocket;
+        if (OriginalWebSocket) {
+          window.WebSocket = function(url, protocols) {
+            console.log('WS hook: Intercepting WebSocket connection to:', url);
+            const ws = new OriginalWebSocket(url, protocols);
+            // Attach a default error handler immediately to prevent unhandled rejection/errors bubbling up
+            ws.addEventListener('error', (e) => {
+              console.warn('Suppressed benign WebSocket error for URL:', url);
+            });
+            return ws;
+          };
+          window.WebSocket.prototype = OriginalWebSocket.prototype;
+          for (let key in OriginalWebSocket) {
+            if (OriginalWebSocket.hasOwnProperty(key)) {
+              window.WebSocket[key] = OriginalWebSocket[key];
+            }
+          }
+        }
+        
+        // Prevent unhandled promise rejections from popping up the red overlay
+        window.addEventListener('unhandledrejection', function(event) {
+          const reason = event.reason;
+          const msg = (reason && (reason.message || reason.stack || String(reason))) || '';
+          if (msg.includes('WebSocket') || msg.includes('websocket') || msg.includes('vite') || msg.includes('HMR') || msg.includes('closed without') || msg.includes('opened')) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            console.warn('Suppressed benign unhandled rejection:', msg);
+          }
+        }, true);
+
+        window.addEventListener('error', function(event) {
+          const msg = event.message || '';
+          if (msg.includes('WebSocket') || msg.includes('websocket') || msg.includes('vite') || msg.includes('HMR')) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            console.warn('Suppressed benign error event:', msg);
+          }
+        }, true);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Founder Outreach and Personalization Engine",
+  "description": "An outreach campaign planner and personalization assistant for matching with early-stage Indian founders and Shark Tank India contestants.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
