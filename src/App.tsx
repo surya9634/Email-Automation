@@ -2314,8 +2314,8 @@ export default function App() {
             selectedIds={selectedIds}
             setSelectedIds={setSelectedIds}
             handleBatchApplyTemplate={handleBatchApplyTemplate}
-            handleBatchShootSelectedAPI={handleBatchShootSelectedAPI}
-            handleBatchDeleteSelected={handleBatchDeleteSelected}
+            handleBatchShootSelectedAPI={() => handleShootAllEmails(true)}
+            handleBatchDeleteSelected={handleBulkDelete}
             setAddModalOpen={setAddModalOpen}
             showOnboarding={showOnboarding}
             setShowOnboarding={setShowOnboarding}
