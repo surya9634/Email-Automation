@@ -133,6 +133,9 @@ export default function App() {
   const [csvImportStatus, setCsvImportStatus] = useState<Founder["status"]>("Draft");
   const [isCsvImporting, setIsCsvImporting] = useState(false);
   const [expandedFounderId, setExpandedFounderId] = useState<string | null>(null);
+  const handleToggleExpandRow = (id: string) => {
+    setExpandedFounderId(prev => prev === id ? null : id);
+  };
 
   const [founders, setFounders] = useState<Founder[]>([]);
   const [loading, setLoading] = useState(true);
