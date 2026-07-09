@@ -30,24 +30,13 @@ import ProfileTab from "./components/ProfileTab";
 const DEFAULT_SUBJECT = "Want to work with [Company] | Why Me?";
 const DEFAULT_BODY = `Hi [Name],
 
-I'm reaching out because I genuinely want to work with you and contribute to what you're building at [Company] & your journey from a long time. 
+I'm reaching out because I genuinely want to work with you and contribute to what you're building at [Company] — been following your journey for a while now.
 
-You probably have one question reading this, why me only?
+[Bio]
 
-I started building and figuring things out at 8, long before startups became a trend. Over the last 5+ years, I've worked across Product, Founder's Office, and Design in startups, not because I couldn't pick one lane, but because I love understanding the full picture and solving whatever the actual problem is.
+If there's any opportunity to contribute and grow alongside your team, I'd be really grateful for the chance. You won't regret giving this 16-year-old a shot.
 
-I also founded an EdTech startup. It failed. But that taught me more about building, distribution, and resilience than anything else could have.
-
-What I love most is taking things from 0 to 1,the messy, no-playbook phase where you just have to figure it out. That's where I'm most alive.
-
-On a personal note, I have lived with Cerebral Palsy my entire life. Every small thing that most people do without thinking has been a quiet battle for me. But fighting those battles every single day built something deep, with persistence, resilience, and an absolute refusal to quit. That's not a weakness I overcame. That's who I am.
-
-That's my answer to why me. I learn fast, take ownership, and I care deeply about what I'm building.
-
-If there's any opportunity right now to contribute and grow alongside your team. I'd be really grateful for the chance to work with you! You won't regret the decision of giving this 16 year old a chance.
-
-Best,
-Suraj`;
+[Signature]`;
 
 const renderEmailBody = (body: string) => {
   if (!body) return null;
@@ -109,7 +98,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authEmail, setAuthEmail] = useState("surajsharma963472@gmail.com");
   const [workspaceEmail, setWorkspaceEmail] = useState<string | null>(() => {
-    return localStorage.getItem("workspace_email") || "surajsharma963472@gmail.com";
+    return localStorage.getItem("workspace_email") || null;
   });
   const [authPassword, setAuthPassword] = useState("");
   const [authMode, setAuthMode] = useState<"login" | "signup" | "reset">("login");
@@ -1446,16 +1435,25 @@ export default function App() {
   // Dynamic Template Resolver
   const resolveTemplate = (subjectTemplate: string, bodyTemplate: string, f: Founder) => {
     const firstName = f.name ? f.name.trim().split(/\s+/)[0] : "Founder";
-    let s = subjectTemplate
+    // Profile-level substitutions (from Pitch Profile tab)
+    const applyProfile = (text: string) => text
+      .replace(/\[Bio\]/g, profile.bio || "")
+      .replace(/\[Experience\]/g, profile.experience || "")
+      .replace(/\[Signature\]/g, profile.emailSignature || "")
+      .replace(/\[MyName\]/g, profile.name || "Suraj")
+      .replace(/\[AdditionalContext\]/g, profile.additionalContext || "");
+
+    let s = applyProfile(subjectTemplate
       .replace(/\[Name\]/g, firstName)
       .replace(/\[Company\]/g, f.company)
       .replace(/\[Sector\]/g, f.sector)
-      .replace(/\[Context\]/g, f.context || "");
-    let b = bodyTemplate
+      .replace(/\[Context\]/g, f.context || ""));
+
+    let b = applyProfile(bodyTemplate
       .replace(/\[Name\]/g, firstName)
       .replace(/\[Company\]/g, f.company)
       .replace(/\[Sector\]/g, f.sector)
-      .replace(/\[Context\]/g, f.context || "");
+      .replace(/\[Context\]/g, f.context || ""));
 
     if (f.customTags) {
       Object.entries(f.customTags).forEach(([key, val]) => {
@@ -2221,7 +2219,7 @@ export default function App() {
           <div className="flex items-center gap-4 self-start md:self-auto">
             <div className="flex flex-col items-end">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Workspace</span>
-              <span className="text-xs font-extrabold text-slate-800">{workspaceEmail || "Demo Session"}</span>
+              <span className="text-xs font-extrabold text-slate-800">{workspaceEmail || gmailUserEmail || user?.email || "Not signed in"}</span>
             </div>
 
             {!showOnboarding && (

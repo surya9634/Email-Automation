@@ -490,15 +490,40 @@ export default function EmailTab({
                 Hide
               </button>
             </div>
+
+            {/* File Upload + Paste instructions */}
+            <div className="flex flex-col sm:flex-row gap-2">
+              <label className="flex items-center gap-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-2xs">
+                <Database className="w-3.5 h-3.5 text-indigo-600" />
+                Upload CSV File
+                <input
+                  type="file"
+                  accept=".csv,.tsv,.txt"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      setBulkCsvInput(ev.target?.result as string || "");
+                    };
+                    reader.readAsText(file);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              <p className="text-[10px] text-slate-400 self-center">or paste CSV data directly below</p>
+            </div>
+
             <p className="text-[11px] text-indigo-900/80 leading-relaxed text-left font-medium">
-              Paste CSV or tab-separated lines. The first row can contain header mappings (e.g. <code>Name, Email, Company, Sector, CoffeePreference</code>). Extra columns will be saved under prospect custom tags.
+              Supported columns: <code>Name, Email, Company, Sector, Context</code>. Any extra columns become custom tags (e.g. <code>MutualFriend</code>).
             </p>
             <textarea
               value={bulkCsvInput}
               onChange={(e) => setBulkCsvInput(e.target.value)}
               rows={4}
               className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:border-indigo-400"
-              placeholder="Name, Email, Company, Sector, MutualFriend&#10;Surya, surya@admitkard.com, AdmitKard, EdTech, Piyush&#10;Pratik, pratik@codesquad.co, CodeSquad, Tech, Amit"
+              placeholder={"Name, Email, Company, Sector, MutualFriend\nSurya, surya@admitkard.com, AdmitKard, EdTech, Piyush\nPratik, pratik@codesquad.co, CodeSquad, Tech, Amit"}
             />
             <div className="flex justify-end gap-2 items-center">
               <div className="flex items-center gap-1.5 mr-auto">
@@ -530,6 +555,7 @@ export default function EmailTab({
             </div>
           </div>
         )}
+
 
         {/* Filter controls */}
         <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs space-y-3">
