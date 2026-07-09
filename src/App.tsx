@@ -2316,7 +2316,7 @@ export default function App() {
             handleBatchApplyTemplate={handleBatchApplyTemplate}
             handleBatchShootSelectedAPI={() => handleShootAllEmails(true)}
             handleBatchDeleteSelected={handleBulkDelete}
-            setAddModalOpen={setAddModalOpen}
+            setAddModalOpen={setIsAddModalOpen}
             showOnboarding={showOnboarding}
             setShowOnboarding={setShowOnboarding}
           />
@@ -2374,9 +2374,9 @@ export default function App() {
       </div>
 
       {/* Add Custom Founder Modal */}
-      {addModalOpen && (
+      {isAddModalOpen && (
         <AddFounderModal 
-          onClose={() => setAddModalOpen(false)}
+          onClose={() => setIsAddModalOpen(false)}
           onAdd={handleAddFounder}
         />
       )}
