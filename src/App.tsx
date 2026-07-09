@@ -438,19 +438,44 @@ export default function App() {
         prompt: "consent select_account"
       });
 
+      let result;
+      let credential;
+
       if (auth.currentUser) {
         try {
-          await linkWithRedirect(auth.currentUser, provider);
+          result = await linkWithPopup(auth.currentUser, provider);
+          credential = GoogleAuthProvider.credentialFromResult(result);
         } catch (linkErr: any) {
-          console.log("linkWithRedirect failed, falling back to signInWithRedirect", linkErr);
-          await signInWithRedirect(auth, provider);
+          console.log("linkWithPopup failed, falling back to signInWithPopup", linkErr);
+          if (
+            linkErr.code === "auth/credential-already-in-use" || 
+            linkErr.code === "auth/provider-already-linked" ||
+            linkErr.code === "auth/email-already-in-use"
+          ) {
+            result = await signInWithPopup(auth, provider);
+            credential = GoogleAuthProvider.credentialFromResult(result);
+          } else {
+            throw linkErr;
+          }
         }
       } else {
-        await signInWithRedirect(auth, provider);
+        result = await signInWithPopup(auth, provider);
+        credential = GoogleAuthProvider.credentialFromResult(result);
+      }
+
+      if (credential?.accessToken) {
+        setGmailAccessToken(credential.accessToken);
+        setGmailUserEmail(result.user.email || "");
+        sessionStorage.setItem("gmail_access_token", credential.accessToken);
+        sessionStorage.setItem("gmail_user_email", result.user.email || "");
+        showSuccess(`Successfully connected Gmail: ${result.user.email}`);
+      } else {
+        showError("Failed to retrieve Gmail access token. Try again.");
       }
     } catch (err: any) {
       console.error("Gmail connect error:", err);
       showError("Gmail connection was interrupted or failed. Please try again.");
+    } finally {
       setIsConnectingGmail(false);
     }
   };
