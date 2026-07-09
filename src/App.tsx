@@ -653,9 +653,11 @@ export default function App() {
         if (lines.length === 0) return { headers: [], rows: [] };
         
         const firstLine = lines[0];
-        const hasCommonHeader = firstLine.some(col => 
-          /name|email|mail|company|firm|sector|industry|context/i.test(col)
-        );
+        const isHeaderColumn = (col: string) => {
+          const clean = col.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+          return ["name", "email", "company", "sector", "context", "linkedin", "notes", "fullname", "emailaddress", "companyname", "linkedinurl"].includes(clean);
+        };
+        const hasCommonHeader = firstLine.some(isHeaderColumn);
         
         if (hasCommonHeader) {
           return { headers: firstLine, rows: lines.slice(1) };
@@ -678,6 +680,13 @@ export default function App() {
         let linkedInUrl = "";
         const customTags: Record<string, string> = {};
 
+        // 1. Search for any column containing an email address
+        const emailIdx = row.findIndex(val => val.includes("@"));
+        if (emailIdx !== -1) {
+          email = row[emailIdx];
+        }
+
+        // 2. Map based on headers
         headers.forEach((header, idx) => {
           const value = row[idx] || "";
           const cleanHeader = header.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -685,7 +694,7 @@ export default function App() {
           if (cleanHeader === "name" || cleanHeader === "fullname" || cleanHeader === "foundername") {
             name = value || name;
           } else if (cleanHeader === "email" || cleanHeader === "emailaddress" || cleanHeader === "mail") {
-            email = value;
+            email = value || email;
           } else if (cleanHeader === "company" || cleanHeader === "companyname" || cleanHeader === "firm") {
             company = value || company;
           } else if (cleanHeader === "sector" || cleanHeader === "industry") {
@@ -693,11 +702,22 @@ export default function App() {
           } else if (cleanHeader === "context" || cleanHeader === "notes" || cleanHeader === "background") {
             context = value || context;
           } else if (cleanHeader === "linkedin" || cleanHeader === "linkedinurl") {
-            linkedInUrl = value;
+            linkedInUrl = value || linkedInUrl;
           } else {
-            customTags[header] = value;
+            if (idx !== emailIdx) {
+              customTags[header] = value;
+            }
           }
         });
+
+        // 3. Positional fallbacks for headerless layout
+        const isHeaderless = headers.every(h => h.startsWith("column"));
+        if (isHeaderless) {
+          if (row.length >= 1 && emailIdx !== 0) name = row[0] || name;
+          if (row.length >= 3 && emailIdx !== 2) company = row[2] || company;
+          if (row.length >= 4 && emailIdx !== 3) sector = row[3] || sector;
+          if (row.length >= 5) context = row.slice(4).join(", ") || context;
+        }
 
         if (!email || !email.includes("@")) {
           return;
