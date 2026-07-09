@@ -30,14 +30,13 @@ export default function ProfileTab({ profile, onSave, onReset }: ProfileTabProps
   };
 
   const handleResetClick = () => {
-    if (confirm("Are you sure you want to reset your bio details to the default outreach values?")) {
+    if (window.confirm("Are you sure you want to reset your bio details to the default outreach values?")) {
       onReset();
-      // Synchronize states
-      setName("Radhey");
+      setName("Suraj");
       setBio(`Hi, I'm reaching out because I genuinely want to work with you and contribute to what you're building. I started building and figuring things out at 8, long before startups became a trend. Over the last 5+ years, I've worked across Product, Founder's Office, and Design in startups, not because I couldn't pick one lane, but because I love understanding the full picture and solving whatever the actual problem is. I also founded an EdTech startup. It failed. But that taught me more about building, distribution, and resilience than anything else could have. What I love most is taking things from 0 to 1, the messy, no-playbook phase where you just have to figure it out. That's where I'm most alive. On a personal note, I have lived with Cerebral Palsy my entire life. Every small thing that most people do without thinking has been a quiet battle for me. But fighting those battles every single day built something deep, with persistence, resilience, and an absolute refusal to quit. That's not a weakness I overcame. That's who I am. That's my answer to why me. I learn fast, take ownership, and I care deeply about what I'm building.`);
       setExperience("5+ Years across Product, Founder's Office, Design, and EdTech Founder");
       setAdditionalContext("Targeting early-stage Indian founders who appreciate resilience, high-ownership, and versatile building.");
-      setEmailSignature("Best,\nRadhey");
+      setEmailSignature("Best,\nSuraj");
     }
   };
 

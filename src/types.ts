@@ -9,11 +9,10 @@ export interface Founder {
   personalizedSubject?: string;
   personalizedEmail?: string;
   linkedInUrl?: string;
-  isVerified?: boolean;
-  verificationStatus?: "Pending" | "Verified" | "Not Found";
-  verificationLogs?: string;
+  personalizedLinkedInMsg?: string;
   createdAt: string;
   updatedAt: string;
+  customTags?: Record<string, string>;
 }
 
 export interface UserProfile {
