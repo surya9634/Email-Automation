@@ -15,9 +15,8 @@ import {
   onAuthStateChanged,
   User,
   GoogleAuthProvider,
-  signInWithRedirect,
-  linkWithRedirect,
-  getRedirectResult
+  signInWithPopup,
+  linkWithPopup
 } from "firebase/auth";
 import { db, auth } from "./firebase";
 import { Founder } from "./types";
@@ -242,47 +241,7 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // Handle Firebase redirect results (for Google Sign-In and Gmail connection)
-  useEffect(() => {
-    async function handleRedirectResult() {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          const credential = GoogleAuthProvider.credentialFromResult(result);
-          
-          // Case 1: Google Sign-in redirect result
-          if (result.user.email) {
-            setWorkspaceEmail(result.user.email);
-            localStorage.setItem("workspace_email", result.user.email);
-          }
 
-          // Case 2: Gmail link/scope redirect result
-          if (credential?.accessToken) {
-            setGmailAccessToken(credential.accessToken);
-            setGmailUserEmail(result.user.email || "");
-            sessionStorage.setItem("gmail_access_token", credential.accessToken);
-            sessionStorage.setItem("gmail_user_email", result.user.email || "");
-            showSuccess(`Successfully connected Gmail: ${result.user.email}`);
-          } else {
-            showSuccess("Signed in with Google successfully!");
-          }
-        }
-      } catch (err: any) {
-        console.error("Redirect auth error:", err);
-        let msg = "Google authentication failed. Please try again.";
-        if (err.code === "auth/popup-blocked") {
-          msg = "The Google sign-in popup was blocked by your browser. Please enable popups or try the Email option.";
-        } else if (err.code === "auth/popup-closed-by-user") {
-          msg = "Google sign-in window was closed before completion.";
-        } else if (err.code === "auth/credential-already-in-use" || err.code === "auth/email-already-in-use") {
-          msg = "This Google account is already linked to another profile in your Firebase project. Please sign out and sign in with Google directly.";
-        }
-        setAuthError(msg);
-        showError(msg);
-      }
-    }
-    handleRedirectResult();
-  }, []);
 
   // Load from Firebase on Boot
   useEffect(() => {
@@ -390,10 +349,24 @@ export default function App() {
       provider.setCustomParameters({
         prompt: "select_account"
       });
-      await signInWithRedirect(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      if (result.user.email) {
+        setWorkspaceEmail(result.user.email);
+        localStorage.setItem("workspace_email", result.user.email);
+      }
+      showSuccess("Signed in with Google successfully!");
     } catch (err: any) {
       console.error("Google sign-in error:", err);
-      setAuthError("Google authentication initiation failed. Please try again.");
+      let msg = "Google authentication failed. Please try again.";
+      if (err.code === "auth/popup-blocked") {
+        msg = "The Google sign-in popup was blocked by your browser. Please enable popups or try the Email option.";
+      } else if (err.code === "auth/popup-closed-by-user") {
+        msg = "Google sign-in window was closed before completion.";
+      } else if (err.code === "auth/cancelled-popup-request") {
+        msg = "Popup request was cancelled or conflict occurred.";
+      }
+      setAuthError(msg);
+    } finally {
       setAuthLoading(false);
     }
   };
@@ -407,8 +380,8 @@ export default function App() {
     if (!body.includes("<br") && !body.includes("<p")) {
       // Replace name with clickable LinkedIn links
       htmlBody = htmlBody
-        .replace(/Radhey Mohan Mishra/g, '<a href="https://www.linkedin.com/in/radheymohanmishra/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Radhey Mohan Mishra</a>')
-        .replace(/\bRadhey\b/g, '<a href="https://www.linkedin.com/in/radheymohanmishra/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Radhey</a>');
+        .replace(/Suraj Sharma/g, '<a href="https://www.linkedin.com/in/surya-07-sharma/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Suraj Sharma</a>')
+        .replace(/\bSuraj\b/g, '<a href="https://www.linkedin.com/in/surya-07-sharma/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Suraj</a>');
       
       // Convert newlines to HTML breaks
       htmlBody = htmlBody.replace(/\r?\n/g, "<br />");
