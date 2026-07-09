@@ -2,7 +2,8 @@ import React, { useState, useMemo } from "react";
 import { 
   Users, Send, CheckCircle2, AlertCircle, RefreshCw, 
   Layers, Mail, Sparkles, Plus, Trash2, Search, 
-  CheckSquare, Square, Copy, ChevronDown, ChevronLeft, ChevronRight 
+  CheckSquare, Square, Copy, ChevronDown, ChevronLeft, ChevronRight,
+  Database
 } from "lucide-react";
 import { Founder } from "../types";
 
