@@ -211,6 +211,12 @@ async function startServer() {
   const app = express();
   app.use(express.json());
 
+  // Set headers to allow Firebase Authentication OAuth popups to communicate back to the parent window
+  app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    next();
+  });
+
   // Health check endpoint for uptime pinging services to keep server active
   app.get("/ping", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
