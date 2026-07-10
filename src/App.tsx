@@ -16,7 +16,10 @@ import {
   User,
   GoogleAuthProvider,
   signInWithPopup,
-  linkWithPopup
+  signInWithRedirect,
+  linkWithPopup,
+  linkWithRedirect,
+  getRedirectResult
 } from "firebase/auth";
 import { db, auth } from "./firebase";
 import { Founder, UserProfile } from "./types";
@@ -249,6 +252,26 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // Pick up Gmail token after a redirect-based auth (popup was blocked)
+  useEffect(() => {
+    if (sessionStorage.getItem("gmail_redirect_pending") !== "1") return;
+    getRedirectResult(auth).then((result) => {
+      if (!result) return;
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (credential?.accessToken) {
+        setGmailAccessToken(credential.accessToken);
+        setGmailUserEmail(result.user.email || "");
+        sessionStorage.setItem("gmail_access_token", credential.accessToken);
+        sessionStorage.setItem("gmail_user_email", result.user.email || "");
+        showSuccess(`Gmail connected: ${result.user.email}`);
+      }
+      sessionStorage.removeItem("gmail_redirect_pending");
+    }).catch((err) => {
+      console.error("Redirect result error:", err);
+      sessionStorage.removeItem("gmail_redirect_pending");
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
 
 
   // Load from Firebase on Boot
@@ -456,43 +479,61 @@ export default function App() {
         prompt: "consent select_account"
       });
 
-      let result;
-      let credential;
-
-      if (auth.currentUser) {
-        try {
-          result = await linkWithPopup(auth.currentUser, provider);
-          credential = GoogleAuthProvider.credentialFromResult(result);
-        } catch (linkErr: any) {
-          console.log("linkWithPopup failed, falling back to signInWithPopup", linkErr);
-          if (
-            linkErr.code === "auth/credential-already-in-use" || 
-            linkErr.code === "auth/provider-already-linked" ||
-            linkErr.code === "auth/email-already-in-use"
-          ) {
-            result = await signInWithPopup(auth, provider);
-            credential = GoogleAuthProvider.credentialFromResult(result);
-          } else {
-            throw linkErr;
+      const tryPopup = async () => {
+        let result;
+        if (auth.currentUser) {
+          try {
+            result = await linkWithPopup(auth.currentUser, provider);
+          } catch (linkErr: any) {
+            if (
+              linkErr.code === "auth/credential-already-in-use" ||
+              linkErr.code === "auth/provider-already-linked" ||
+              linkErr.code === "auth/email-already-in-use"
+            ) {
+              result = await signInWithPopup(auth, provider);
+            } else {
+              throw linkErr;
+            }
           }
+        } else {
+          result = await signInWithPopup(auth, provider);
         }
-      } else {
-        result = await signInWithPopup(auth, provider);
-        credential = GoogleAuthProvider.credentialFromResult(result);
-      }
+        return result;
+      };
 
-      if (credential?.accessToken) {
-        setGmailAccessToken(credential.accessToken);
-        setGmailUserEmail(result.user.email || "");
-        sessionStorage.setItem("gmail_access_token", credential.accessToken);
-        sessionStorage.setItem("gmail_user_email", result.user.email || "");
-        showSuccess(`Successfully connected Gmail: ${result.user.email}`);
-      } else {
-        showError("Failed to retrieve Gmail access token. Try again.");
+      try {
+        const result = await tryPopup();
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        if (credential?.accessToken) {
+          setGmailAccessToken(credential.accessToken);
+          setGmailUserEmail(result.user.email || "");
+          sessionStorage.setItem("gmail_access_token", credential.accessToken);
+          sessionStorage.setItem("gmail_user_email", result.user.email || "");
+          showSuccess(`Successfully connected Gmail: ${result.user.email}`);
+        } else {
+          showError("Failed to retrieve Gmail access token. Try again.");
+        }
+      } catch (popupErr: any) {
+        if (
+          popupErr.code === "auth/popup-blocked" ||
+          popupErr.code === "auth/popup-closed-by-user"
+        ) {
+          // Popup was blocked — fall back to redirect (page will reload)
+          showSuccess("Popup blocked by browser. Redirecting to Google sign-in...");
+          sessionStorage.setItem("gmail_redirect_pending", "1");
+          if (auth.currentUser) {
+            await linkWithRedirect(auth.currentUser, provider);
+          } else {
+            await signInWithRedirect(auth, provider);
+          }
+          // Page reloads — token picked up in useEffect below
+          return;
+        }
+        throw popupErr;
       }
     } catch (err: any) {
       console.error("Gmail connect error:", err);
-      showError("Gmail connection was interrupted or failed. Please try again.");
+      showError("Gmail connection failed. Please try again.");
     } finally {
       setIsConnectingGmail(false);
     }
