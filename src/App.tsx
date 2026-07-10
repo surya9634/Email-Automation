@@ -770,8 +770,8 @@ export default function App() {
           sector,
           email,
           context,
-          linkedInUrl: linkedInUrl || undefined,
-          customTags: Object.keys(customTags).length > 0 ? customTags : undefined,
+          ...(linkedInUrl ? { linkedInUrl } : {}),
+          ...(Object.keys(customTags).length > 0 ? { customTags } : {}),
           status: csvImportStatus,
           createdAt: timestamp,
           updatedAt: timestamp
@@ -790,7 +790,7 @@ export default function App() {
         const chunk = newFoundersList.slice(i, i + batchSize);
         const batch = writeBatch(db);
         chunk.forEach(f => {
-          batch.set(doc(db, "founders", f.id), f);
+          batch.set(doc(db, "founders", f.id), safeFirestoreData(f));
         });
         await batch.commit();
       }
