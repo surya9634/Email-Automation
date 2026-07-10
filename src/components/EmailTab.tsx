@@ -161,13 +161,13 @@ export default function EmailTab({
   };
 
   const handleToggleSelectAll = () => {
-    const pageIds = paginatedList.map(f => f.id);
-    const allChecked = pageIds.every(id => selectedIds.includes(id));
+    const filteredIds = filtered.map(f => f.id);
+    const allChecked = filteredIds.length > 0 && filteredIds.every(id => selectedIds.includes(id));
     if (allChecked) {
-      setSelectedIds(prev => prev.filter(id => !pageIds.includes(id)));
+      setSelectedIds(prev => prev.filter(id => !filteredIds.includes(id)));
     } else {
       setSelectedIds(prev => {
-        const added = pageIds.filter(id => !prev.includes(id));
+        const added = filteredIds.filter(id => !prev.includes(id));
         return [...prev, ...added];
       });
     }
@@ -433,7 +433,7 @@ export default function EmailTab({
               onClick={handleToggleSelectAll}
               className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-3xs"
             >
-              {paginatedList.length > 0 && paginatedList.every(f => selectedIds.includes(f.id)) ? "Deselect Page" : "Select Page"}
+              {filtered.length > 0 && filtered.every(f => selectedIds.includes(f.id)) ? "Deselect All" : "Select All"}
             </button>
 
             {selectedIds.length > 0 && (
@@ -691,7 +691,7 @@ export default function EmailTab({
                       onClick={handleToggleSelectAll}
                       className="text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                     >
-                      {paginatedList.length > 0 && paginatedList.every(f => selectedIds.includes(f.id)) ? (
+                      {filtered.length > 0 && filtered.every(f => selectedIds.includes(f.id)) ? (
                         <CheckSquare className="w-4 h-4 text-indigo-600" />
                       ) : (
                         <Square className="w-4 h-4" />

@@ -83,7 +83,7 @@ export default function ProfileTab({ profile, onSave, onReset }: ProfileTabProps
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">
-              Hiring Experience Focus
+              CTA / Offers
             </label>
             <input
               type="text"
@@ -114,14 +114,14 @@ export default function ProfileTab({ profile, onSave, onReset }: ProfileTabProps
           />
           <p className="mt-1 text-[11px] text-slate-400 flex items-center gap-1">
             <AlertCircle className="w-3 h-3 text-slate-400 shrink-0" />
-            Keep this raw, authentic, and packed with details (like your Cerebral Palsy story and EdTech startup failure) so the AI drafts genuinely compelling letters.
+            Keep this raw, authentic, and packed with details so the AI drafts genuinely compelling letters.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">
-              Ideal Role Target Focus
+              Ideal Role
             </label>
             <input
               type="text"
@@ -139,7 +139,7 @@ export default function ProfileTab({ profile, onSave, onReset }: ProfileTabProps
               type="text"
               value={emailSignature}
               onChange={(e) => setEmailSignature(e.target.value)}
-              placeholder="e.g. Best regards, Radhey"
+              placeholder="e.g. Best regards, Suraj"
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-slate-400"
             />
           </div>
