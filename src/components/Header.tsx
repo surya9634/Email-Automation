@@ -52,7 +52,7 @@ export default function Header({ founders }: HeaderProps) {
             </h1>
           </div>
           <p className="text-sm text-slate-500">
-            Radhey's personalized, AI-powered outreach launcher targeting early-stage Indian &amp; Shark Tank founders.
+            Suraj's personalized, AI-powered outreach launcher targeting early-stage Indian &amp; Shark Tank founders.
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full self-start md:self-auto font-mono">

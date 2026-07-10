@@ -2150,7 +2150,7 @@ export default function App() {
                   value={authEmail}
                   onChange={(e) => setAuthEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-slate-400"
-                  placeholder="radheymohanmishra13@gmail.com"
+                  placeholder="surajsharma963472@gmail.com"
                 />
               </div>
 

@@ -473,7 +473,7 @@ export default function CampaignTab({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `Radhey_Founder_Outreach_Campaign_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `Suraj_Founder_Outreach_Campaign_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -562,7 +562,7 @@ export default function CampaignTab({
     if (!currentSequencerFounder) return;
     
     // Open appropriate mail link
-    const subject = currentSequencerFounder.personalizedSubject || `Hi ${currentSequencerFounder.name} | Reaching out from Radhey`;
+    const subject = currentSequencerFounder.personalizedSubject || `Hi ${currentSequencerFounder.name} | Reaching out from Suraj`;
     const body = currentSequencerFounder.personalizedEmail || "";
     
     if (mode === "gmail") {
@@ -1073,8 +1073,8 @@ export default function CampaignTab({
                                 const escapedBody = finalBody.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                                 
                                 let htmlBody = escapedBody.replace(/\n/g, "<br>");
-                                htmlBody = htmlBody.replace(/Radhey Mohan Mishra/g, '<a href="https://www.linkedin.com/in/radheymohanmishra/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Radhey Mohan Mishra</a>');
-                                htmlBody = htmlBody.replace(/Radhey/g, '<a href="https://www.linkedin.com/in/radheymohanmishra/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Radhey</a>');
+                                htmlBody = htmlBody.replace(/Suraj Sharma/g, '<a href="https://www.linkedin.com/in/surya-07-sharma/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Suraj Sharma</a>');
+                                htmlBody = htmlBody.replace(/\bSuraj\b/g, '<a href="https://www.linkedin.com/in/surya-07-sharma/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Suraj</a>');
 
                                 const htmlText = `<strong>Subject:</strong> ${escapedSubject}<br><br>${htmlBody}`;
 
@@ -1382,8 +1382,8 @@ export default function CampaignTab({
                       const escapedBody = (currentSequencerFounder.personalizedEmail || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                       
                       let htmlBody = escapedBody.replace(/\n/g, "<br>");
-                      htmlBody = htmlBody.replace(/Radhey Mohan Mishra/g, '<a href="https://www.linkedin.com/in/radheymohanmishra/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Radhey Mohan Mishra</a>');
-                      htmlBody = htmlBody.replace(/Radhey/g, '<a href="https://www.linkedin.com/in/radheymohanmishra/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Radhey</a>');
+                      htmlBody = htmlBody.replace(/Suraj Sharma/g, '<a href="https://www.linkedin.com/in/surya-07-sharma/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Suraj Sharma</a>');
+                      htmlBody = htmlBody.replace(/\bSuraj\b/g, '<a href="https://www.linkedin.com/in/surya-07-sharma/" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Suraj</a>');
 
                       const htmlText = `<strong>Subject:</strong> ${escapedSubject}<br><br>${htmlBody}`;
 
