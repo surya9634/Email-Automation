@@ -83,7 +83,7 @@ export default function ProfileTab({ profile, onSave, onReset }: ProfileTabProps
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">
-              CTA / Offers
+              Call to Action (CTA) / Next Step
             </label>
             <input
               type="text"
@@ -91,6 +91,7 @@ export default function ProfileTab({ profile, onSave, onReset }: ProfileTabProps
               onChange={(e) => setExperience(e.target.value)}
               required
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-slate-400"
+              placeholder="e.g. Are you free for a 10-minute call next Tuesday at 3 PM?"
             />
           </div>
         </div>
@@ -121,13 +122,13 @@ export default function ProfileTab({ profile, onSave, onReset }: ProfileTabProps
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">
-              Ideal Role
+              Special Offer / Gift (e.g. Free Audit, Trial, Coupon)
             </label>
             <input
               type="text"
               value={additionalContext}
               onChange={(e) => setAdditionalContext(e.target.value)}
-              placeholder="e.g. Product Management, Founder's Office, Generalist Builder"
+              placeholder="e.g. I'll do a free UX audit of your landing page, or work for free for 1 week"
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-slate-400"
             />
           </div>

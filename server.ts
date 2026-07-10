@@ -252,8 +252,8 @@ You will write an email from ${sender} to a startup founder.
 ${sender}'s Story / Bio:
 ${userBio}
 
-${sender}'s Experience: ${userExperience}
-Additional targeting context: ${userAdditionalContext}
+${sender}'s Call to Action (CTA) / Next Step: ${userExperience}
+${sender}'s Special Offer / Value Proposition (e.g. coupon, free trial, or customized gift/bonus): ${userAdditionalContext}
 
 Your job is to tailor ${sender}'s pitch specifically to:
 - Founder: ${founderName}
@@ -273,6 +273,8 @@ RULES:
 - Do NOT write generic AI fluff (avoid "I hope this email finds you well", "As an admirer of your work", "Let's synergize").
 - DO NOT use unfilled placeholders like [Insert Name] or [Date]. Output must be fully ready to send.
 - Incorporate the Cerebral Palsy story only if the tone calls for it — keep it deeply authentic.
+- Explicitly integrate the Special Offer / Value Proposition into the email body (e.g. offering a free audit, a trial period, or coupon).
+- End the email with the specified Call to Action (CTA) / Next Step.
 - The email must feel extremely real, human, and tailored specifically to ${companyName} and what ${founderName} is building.
 - Sign off with the sender's name: ${sender}
 - Output ONLY a valid JSON object with keys: "subject" and "body". No markdown, no extra text.`;
