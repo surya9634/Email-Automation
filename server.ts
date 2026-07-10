@@ -225,11 +225,13 @@ async function startServer() {
   // API endpoint to generate a personalized pitch
   app.post("/api/generate-pitch", async (req, res) => {
     try {
-      const { founderName, companyName, sector, context, bio, tone } = req.body;
+      const { founderName, companyName, sector, context, bio, tone, senderName, experience, additionalContext } = req.body;
 
       if (!founderName || !companyName) {
         return res.status(400).json({ error: "Founder name and Company name are required." });
       }
+
+      const sender = senderName || "Suraj";
 
       if (!ai) {
         console.log("INFO: Gemini API key is missing. Generating custom pitch locally.");
@@ -237,36 +239,42 @@ async function startServer() {
         return res.json(fallbackPitch);
       }
 
-      const defaultBio = `Hi, I'm Radhey. I genuinely want to work with you and contribute to what you're building. I started building and figuring things out at 8, long before startups became a trend. Over the last 5+ years, I've worked across Product, Founder's Office, and Design in startups, not because I couldn't pick one lane, but because I love understanding the full picture and solving whatever the actual problem is. I also founded an EdTech startup. It failed. But that taught me more about building, distribution, and resilience than anything else could have. What I love most is taking things from 0 to 1, the messy, no-playbook phase where you just have to figure it out. That's where I'm most alive. On a personal note, I have lived with Cerebral Palsy my entire life. Every small thing that most people do without thinking has been a quiet battle for me. But fighting those battles every single day built something deep, with persistence, resilience, and an absolute refusal to quit. That's not a weakness I overcame. That's who I am. I learn fast, take ownership, and I care deeply about what I'm building.`;
+      const defaultBio = `Hi, I'm ${sender}. I genuinely want to work with you and contribute to what you're building. I started building and figuring things out at 8, long before startups became a trend. Over the last 5+ years, I've worked across Product, Founder's Office, and Design in startups. I also founded an EdTech startup that failed — which taught me more about building, distribution, and resilience than anything else could have. I have lived with Cerebral Palsy my entire life. Every small thing that most people do without thinking has been a quiet battle for me. But fighting those battles every single day built something deep, with persistence, resilience, and an absolute refusal to quit. That's not a weakness I overcame. That's who I am. I learn fast, take ownership, and I care deeply about what I'm building.`;
 
       const userBio = bio || defaultBio;
+      const userExperience = experience || "5+ years across Product, Founder's Office, Design, and EdTech";
+      const userAdditionalContext = additionalContext || "Targeting early-stage Indian founders";
 
       const systemPrompt = `You are an elite outreach strategist specializing in writing highly converting, authentic, and hyper-personalized cold outreach emails.
-You will write an email from Radhey to a startup founder. 
+You will write an email from ${sender} to a startup founder.
 
-Radhey's Story:
+${sender}'s Story / Bio:
 ${userBio}
 
-Your job is to tailor Radhey's pitch to:
+${sender}'s Experience: ${userExperience}
+Additional targeting context: ${userAdditionalContext}
+
+Your job is to tailor ${sender}'s pitch specifically to:
 - Founder: ${founderName}
 - Company: ${companyName}
 - Sector/Focus: ${sector || "Tech"}
-- Extra context/Shark Tank background: ${context || "Early-stage startup"}
+- Extra context/background: ${context || "Early-stage startup"}
 
-Depending on the chosen Tone:
-1. "Authentic & Deep Connection" - Emphasize Radhey's life journey with Cerebral Palsy as a testament to his grit and resilience, and link it with the founder's struggle of building a company from scratch. Give a highly emotional and sincere touch.
-2. "Value & Product Audit Focused" - Keep it professional. Start with a direct observation about their product/business and suggest a quick value proposition of how Radhey's multi-functional experience (Product, Design, Founder's office) can solve an immediate headache for them.
-3. "Edtech Resilience Connection" - Use this specifically for EdTech founders. Emphasize Radhey's experience of founding his own EdTech startup, how it failed, the extreme lessons he learned in distribution/engagement, and how he wants to apply those to their vision.
-4. "Short, Bulleted & High-Impact" - Write a very punchy, short email (max 150 words) with crisp bullet points highlighting: Radhey's background, why he wants to join them, and his ask.
+Chosen Email Tone: "${tone || "Authentic & Deep Connection"}"
+Tone guidelines:
+1. "Authentic & Deep Connection" - Emphasize ${sender}'s life journey with Cerebral Palsy as a testament to grit and resilience, linking it with the founder's struggle of building from scratch. Highly emotional and sincere.
+2. "Value & Product Audit Focused" - Professional. Start with a direct observation about their product/business and a quick value proposition of how ${sender}'s multi-functional experience (Product, Design, Founder's office) can solve an immediate problem.
+3. "Edtech Resilience Connection" - For EdTech founders. Emphasize ${sender}'s experience founding their own EdTech startup, how it failed, the extreme lessons learned, and how they want to apply those to the founder's vision.
+4. "Short, Bulleted & High-Impact" - Punchy, short email (max 150 words) with crisp bullet points: ${sender}'s background, why they want to join, and the ask.
 
 RULES:
-- CRITICAL: Address the founder by their first name ONLY (e.g. "Hi Rohan" instead of "Hi Rohan Verma") in the email greeting and anywhere within the email. Never include their last name or full name in the greeting.
-- Do NOT sound like standard ChatGPT fluff (avoid phrases like "I hope this email finds you well", "As an admirer of your work", "Let's synergize").
-- DO NOT use placeholders like [Insert Name] or [Insert Company] or [Date]. The output must be fully populated with actual details and ready to send.
-- Incorporate Radhey's Cerebral Palsy story only if appropriate and keep it deeply authentic—it is his source of strength, grit, and refusal to quit.
-- The outcome must feel extremely real, human, and tailored specifically to ${companyName}.
-- Output should be a valid JSON with keys: "subject" and "body". Return ONLY the JSON object, do not wrap it in any markdown blocks or other text.`;
-
+- CRITICAL: Address the founder by FIRST NAME ONLY (e.g. "Hi Rohan" not "Hi Rohan Verma") throughout the entire email.
+- Do NOT write generic AI fluff (avoid "I hope this email finds you well", "As an admirer of your work", "Let's synergize").
+- DO NOT use unfilled placeholders like [Insert Name] or [Date]. Output must be fully ready to send.
+- Incorporate the Cerebral Palsy story only if the tone calls for it — keep it deeply authentic.
+- The email must feel extremely real, human, and tailored specifically to ${companyName} and what ${founderName} is building.
+- Sign off with the sender's name: ${sender}
+- Output ONLY a valid JSON object with keys: "subject" and "body". No markdown, no extra text.`;
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: systemPrompt,

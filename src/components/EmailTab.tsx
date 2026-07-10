@@ -3,9 +3,11 @@ import {
   Users, Send, CheckCircle2, AlertCircle, RefreshCw, 
   Layers, Mail, Sparkles, Plus, Trash2, Search, 
   CheckSquare, Square, Copy, ChevronDown, ChevronLeft, ChevronRight,
-  Database
+  Database, Zap
 } from "lucide-react";
-import { Founder } from "../types";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../firebase";
+import { Founder, UserProfile } from "../types";
 
 interface EmailTabProps {
   founders: Founder[];
@@ -50,6 +52,7 @@ interface EmailTabProps {
   handleBatchShootSelectedAPI: () => void;
   handleBatchDeleteSelected: () => void;
   setAddModalOpen: (val: boolean) => void;
+  profile: UserProfile;
   
   showOnboarding: boolean;
   setShowOnboarding: (val: boolean) => void;
@@ -98,15 +101,21 @@ export default function EmailTab({
   handleBatchShootSelectedAPI,
   handleBatchDeleteSelected,
   setAddModalOpen,
+  profile,
   
   showOnboarding,
   setShowOnboarding
 }: EmailTabProps) {
   
+  // AI Personalization state
+  const [isAiPersonalizing, setIsAiPersonalizing] = useState(false);
+  const [aiProgress, setAiProgress] = useState({ current: 0, total: 0 });
+
   // Table search and filters
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sectorFilter, setSectorFilter] = useState("All");
+  const [aiTone, setAiTone] = useState("Authentic & Deep Connection");
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -431,11 +440,81 @@ export default function EmailTab({
               <>
                 <button
                   onClick={() => handleBatchApplyTemplate(false)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
-                  title="Fills Subject and Body placeholders locally for checked rows"
+                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                  title="Fills Subject and Body template placeholders locally for checked rows"
                 >
-                  Personalize Selected ({selectedIds.length})
+                  Apply Template ({selectedIds.length})
                 </button>
+
+                <button
+                  disabled={isAiPersonalizing}
+                  onClick={async () => {
+                    if (selectedIds.length === 0) return;
+                    setIsAiPersonalizing(true);
+                    setAiProgress({ current: 0, total: selectedIds.length });
+                    const listCopy = [...founders];
+                    let done = 0;
+                    for (const id of selectedIds) {
+                      const founder = listCopy.find(f => f.id === id);
+                      if (!founder) { done++; continue; }
+                      setAiProgress(p => ({ ...p, current: done + 1 }));
+                      try {
+                        const res = await fetch("/api/generate-pitch", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            founderName: founder.name,
+                            companyName: founder.company,
+                            sector: founder.sector,
+                            context: founder.context,
+                            bio: profile?.bio,
+                            tone: aiTone,
+                            senderName: profile?.name || "Suraj",
+                            experience: profile?.experience,
+                            additionalContext: profile?.additionalContext,
+                          }),
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          const docRef = doc(db, "founders", id);
+                          await updateDoc(docRef, {
+                            personalizedSubject: data.subject || "",
+                            personalizedEmail: data.body || "",
+                            status: "Generated",
+                            updatedAt: new Date().toISOString()
+                          });
+                          const idx = listCopy.findIndex(f => f.id === id);
+                          if (idx !== -1) listCopy[idx] = { ...listCopy[idx], personalizedSubject: data.subject, personalizedEmail: data.body, status: "Generated", updatedAt: new Date().toISOString() };
+                        }
+                      } catch (e) {
+                        console.error("AI pitch failed for", founder.name, e);
+                      }
+                      done++;
+                    }
+                    setFounders(listCopy);
+                    setIsAiPersonalizing(false);
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+                  title="Generate fully personalized emails for selected leads using Gemini AI"
+                >
+                  {isAiPersonalizing ? (
+                    <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Generating {aiProgress.current}/{aiProgress.total}...</>
+                  ) : (
+                    <><Zap className="w-3.5 h-3.5" /> AI Personalize ({selectedIds.length})</>
+                  )}
+                </button>
+
+                <select
+                  value={aiTone}
+                  onChange={e => setAiTone(e.target.value)}
+                  className="text-[10px] bg-white border border-slate-200 px-2 py-1.5 rounded-xl font-bold cursor-pointer text-slate-600 shadow-3xs"
+                  title="Tone for Gemini AI generation"
+                >
+                  <option>Authentic &amp; Deep Connection</option>
+                  <option>Value &amp; Product Audit Focused</option>
+                  <option>Edtech Resilience Connection</option>
+                  <option>Short, Bulleted &amp; High-Impact</option>
+                </select>
 
                 <button
                   onClick={handleBatchShootSelectedAPI}

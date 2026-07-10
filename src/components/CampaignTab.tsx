@@ -371,6 +371,9 @@ export default function CampaignTab({
               context: founder.context,
               bio: profile.bio,
               tone: bulkTone,
+              senderName: profile.name || "Suraj",
+              experience: profile.experience,
+              additionalContext: profile.additionalContext,
             }),
           });
 

@@ -2335,6 +2335,7 @@ export default function App() {
             handleBatchShootSelectedAPI={() => handleShootAllEmails(true)}
             handleBatchDeleteSelected={handleBulkDelete}
             setAddModalOpen={setIsAddModalOpen}
+            profile={profile}
             showOnboarding={showOnboarding}
             setShowOnboarding={setShowOnboarding}
           />
