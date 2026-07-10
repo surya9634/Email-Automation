@@ -482,17 +482,25 @@ export default function App() {
       const tryPopup = async () => {
         let result;
         if (auth.currentUser) {
-          try {
-            result = await linkWithPopup(auth.currentUser, provider);
-          } catch (linkErr: any) {
-            if (
-              linkErr.code === "auth/credential-already-in-use" ||
-              linkErr.code === "auth/provider-already-linked" ||
-              linkErr.code === "auth/email-already-in-use"
-            ) {
-              result = await signInWithPopup(auth, provider);
-            } else {
-              throw linkErr;
+          // Check if Google is already linked — if so, skip linkWithPopup and just sign in
+          const alreadyLinked = auth.currentUser.providerData.some(
+            p => p.providerId === "google.com"
+          );
+          if (alreadyLinked) {
+            result = await signInWithPopup(auth, provider);
+          } else {
+            try {
+              result = await linkWithPopup(auth.currentUser, provider);
+            } catch (linkErr: any) {
+              if (
+                linkErr.code === "auth/credential-already-in-use" ||
+                linkErr.code === "auth/provider-already-linked" ||
+                linkErr.code === "auth/email-already-in-use"
+              ) {
+                result = await signInWithPopup(auth, provider);
+              } else {
+                throw linkErr;
+              }
             }
           }
         } else {
