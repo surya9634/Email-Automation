@@ -127,7 +127,7 @@ export default function EmailTab({
     founders.forEach(f => {
       if (f.sector) set.add(f.sector);
     });
-    return ["All", ...Array.from(set).slice(0, 15)];
+    return Array.from(set).slice(0, 15);
   }, [founders]);
 
   // Filter logic
@@ -907,23 +907,58 @@ export default function EmailTab({
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 
-                {Array.from({ length: totalPages }).map((_, idx) => {
-                  const page = idx + 1;
-                  const isCurrent = page === currentPage;
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-7 h-7 rounded-lg border text-center transition-all cursor-pointer ${
-                        isCurrent 
-                          ? "bg-slate-900 border-slate-900 text-white font-extrabold" 
-                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
+                {(() => {
+                  const pages: (number | string)[] = [];
+                  const delta = 1;
+                  const range: number[] = [];
+
+                  for (let i = 1; i <= totalPages; i++) {
+                    if (
+                      i === 1 ||
+                      i === totalPages ||
+                      (i >= currentPage - delta && i <= currentPage + delta)
+                    ) {
+                      range.push(i);
+                    }
+                  }
+
+                  let l: number | undefined;
+                  for (const i of range) {
+                    if (l !== undefined) {
+                      if (i - l === 2) {
+                        pages.push(l + 1);
+                      } else if (i - l !== 1) {
+                        pages.push("...");
+                      }
+                    }
+                    pages.push(i);
+                    l = i;
+                  }
+
+                  return pages.map((page, idx) => {
+                    if (page === "...") {
+                      return (
+                        <span key={`ellipsis-${idx}`} className="px-1 text-slate-400">
+                          ...
+                        </span>
+                      );
+                    }
+                    const isCurrent = page === currentPage;
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page as number)}
+                        className={`w-7 h-7 rounded-lg border text-center transition-all cursor-pointer ${
+                          isCurrent 
+                            ? "bg-slate-900 border-slate-900 text-white font-extrabold" 
+                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  });
+                })()}
 
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}

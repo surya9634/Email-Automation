@@ -13,6 +13,9 @@ export interface Founder {
   createdAt: string;
   updatedAt: string;
   customTags?: Record<string, string>;
+  isVerified?: boolean;
+  verificationStatus?: "Verified" | "Not Found" | "Pending";
+  verificationLogs?: string;
 }
 
 export interface UserProfile {

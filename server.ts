@@ -29,7 +29,8 @@ function generatePitchLocally(
   sector: string,
   context: string,
   userBio: string,
-  tone: string
+  tone: string,
+  senderName: string = "Suraj"
 ): { subject: string; body: string } {
   const firstName = (founderName || "").trim().split(" ")[0] || founderName;
   const targetSector = sector || "tech";
@@ -53,7 +54,7 @@ I see that same relentless drive in how you are scaling ${companyName} (${target
 I'd love to jump on a quick 10-minute call to show you how I can take ownership and add immediate value. Are you free sometime this week?
 
 Warmly,
-Suraj`;
+${senderName}`;
   } else if (tone === "Value & Product Audit Focused") {
     subject = `Value Audit: Solving key product & design headaches at ${companyName}`;
     body = `Hi ${firstName},
@@ -67,7 +68,7 @@ I would love to help you build and refine the user experience at ${companyName},
 Can we set up a short 10-minute chat to discuss a few specific product improvement ideas I compiled for ${companyName}?
 
 Best regards,
-Suraj`;
+${senderName}`;
   } else if (tone === "Edtech Resilience Connection") {
     subject = `From one EdTech founder to another: Building ${companyName} with you, ${firstName}`;
     body = `Hi ${firstName},
@@ -81,10 +82,10 @@ I want to bring those battle-tested lessons, along with my 5+ years of multi-fun
 I'd love to share my learnings and discuss how I can take immediate execution bottlenecks off your plate. Do you have 10 minutes for a quick chat this week?
 
 Best,
-Suraj`;
+${senderName}`;
   } else {
     // "Short, Bulleted & High-Impact"
-    subject = `Suraj + ${companyName}: Hands-on Operator for Product & Design`;
+    subject = `${senderName} + ${companyName}: Hands-on Operator for Product & Design`;
     body = `Hi ${firstName},
 
 I know you are busy building ${companyName}, so I'll keep this extremely direct. 
@@ -98,7 +99,7 @@ I am a multi-functional operator with 5+ years of experience across Product, Des
 I'd love to help you scale ${companyName} (${targetContext}). Do you have 10 minutes for a quick intro call this week?
 
 Best,
-Suraj`;
+${senderName}`;
   }
 
   return { subject, body };
@@ -235,7 +236,7 @@ async function startServer() {
 
       if (!ai) {
         console.log("INFO: Gemini API key is missing. Generating custom pitch locally.");
-        const fallbackPitch = generatePitchLocally(founderName, companyName, sector, context, bio, tone);
+        const fallbackPitch = generatePitchLocally(founderName, companyName, sector, context, bio, tone, sender);
         return res.json(fallbackPitch);
       }
 
@@ -301,7 +302,8 @@ RULES:
         req.body.sector,
         req.body.context,
         req.body.bio,
-        req.body.tone
+        req.body.tone,
+        req.body.senderName || "Suraj"
       );
       return res.json(fallbackPitch);
     }
@@ -951,7 +953,7 @@ CRITICAL RULES:
         console.log(`Attempting live crawl with Google Search Grounding for "site:linkedin.com/in/ ${queryTrimmed}" (limit: ${limit})...`);
         // Crucial fix: DO NOT specify responseMimeType when using tools (googleSearch) to avoid 400 Bad Request error.
         const response = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
+          model: "gemini-2.5-flash",
           contents: searchPrompt,
           config: {
             tools: [{ googleSearch: {} }]
@@ -964,7 +966,7 @@ CRITICAL RULES:
         console.log("Trying native synthesis...");
         try {
           const responseFallback = await ai.models.generateContent({
-            model: "gemini-3.5-flash",
+            model: "gemini-2.5-flash",
             contents: fallbackPrompt,
             config: {
               responseMimeType: "application/json",

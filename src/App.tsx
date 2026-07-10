@@ -99,7 +99,7 @@ const safeFirestoreData = <T extends object>(obj: T): T => {
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
-  const [authEmail, setAuthEmail] = useState("surajsharma963472@gmail.com");
+  const [authEmail, setAuthEmail] = useState("");
   const [workspaceEmail, setWorkspaceEmail] = useState<string | null>(() => {
     return localStorage.getItem("workspace_email") || null;
   });
@@ -133,6 +133,17 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+
+  // Toast Helpers defined early
+  const showSuccess = (msg: string) => {
+    setSuccessMsg(msg);
+    setTimeout(() => setSuccessMsg(""), 4000);
+  };
+
+  const showError = (msg: string) => {
+    setErrorMsg(msg);
+    setTimeout(() => setErrorMsg(""), 5000);
+  };
   
   const [activeTab, setActiveTab] = useState<"email" | "linkedin" | "discover" | "profile">("email");
   const [templateLinkedIn, setTemplateLinkedIn] = useState(
@@ -182,6 +193,7 @@ export default function App() {
 
   // AI Lead Discoverer States
   const [discoverNiche, setDiscoverNiche] = useState("");
+  const [liveSearchQuery, setLiveSearchQuery] = useState("");
   const [discoverLimit, setDiscoverLimit] = useState<number>(15);
   const [discoverTab, setDiscoverTab] = useState<"live" | "database">("database");
   const [isDiscovering, setIsDiscovering] = useState(false);
@@ -811,17 +823,6 @@ export default function App() {
     setCurrentPage(1);
   }, [search, statusFilter, sectorFilter]);
 
-  // Toast Helpers
-  const showSuccess = (msg: string) => {
-    setSuccessMsg(msg);
-    setTimeout(() => setSuccessMsg(""), 4000);
-  };
-
-  const showError = (msg: string) => {
-    setErrorMsg(msg);
-    setTimeout(() => setErrorMsg(""), 5000);
-  };
-
   // Wipe database and re-seed to start fresh
   const handleReSeedDataset = () => {
     showConfirm(
@@ -929,7 +930,7 @@ export default function App() {
         const chunk = freshList.slice(i, i + batchSize);
         const chunkBatch = writeBatch(db);
         chunk.forEach(f => {
-          chunkBatch.set(doc(db, "founders", f.id), f);
+          chunkBatch.set(doc(db, "founders", f.id), safeFirestoreData(f));
         });
         writePromises.push(chunkBatch.commit());
       }
@@ -948,8 +949,8 @@ export default function App() {
 
   // Discover emerging small startups matching niche using server-side Gemini Search Grounding
   const handleDiscoverLeads = async () => {
-    if (!discoverNiche.trim()) {
-      showError("Please specify a target industry or niche to search (e.g., 'Indian FinTech micro-SaaS').");
+    if (!liveSearchQuery.trim()) {
+      showError("Please enter a search niche (e.g. Fintech, SaaS, D2C).");
       return;
     }
 
@@ -973,7 +974,7 @@ export default function App() {
       const response = await fetch("/api/leads/discover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ niche: discoverNiche, limit: discoverLimit }),
+        body: JSON.stringify({ niche: liveSearchQuery, limit: discoverLimit }),
       });
 
       clearInterval(interval);
@@ -1156,7 +1157,7 @@ export default function App() {
 
   // Memoized local matches in LinkedIn Search Tab (Tab 2) using pre-scraped founders
   const localDiscoverMatches = useMemo(() => {
-    if (!discoverNiche.trim()) return [];
+    if (!discoverNiche.trim()) return preseededFounders;
     const query = discoverNiche.trim().toLowerCase();
     return preseededFounders.filter(f => 
       f.name.toLowerCase().includes(query) ||
@@ -1215,16 +1216,17 @@ export default function App() {
 
   // Reset any outreach emails back to Draft status (Bring back wasted credits)
   const handleResetSentFailed = async () => {
+    const listCopy = [...founders];
+    const targets = listCopy.filter(f => f.status !== "Draft");
+    
+    if (targets.length === 0) {
+      showError("No sent, failed, or active outreach emails found to reset.");
+      return;
+    }
+
     try {
       setLoading(true);
       setErrorMsg("");
-      const listCopy = [...founders];
-      const targets = listCopy.filter(f => f.status !== "Draft");
-      
-      if (targets.length === 0) {
-        showError("No sent, failed, or active outreach emails found to reset.");
-        return;
-      }
 
       const batchSize = 100;
       const updatePromises = [];
@@ -2408,6 +2410,8 @@ export default function App() {
             setDiscoverTab={setDiscoverTab}
             discoverNiche={discoverNiche}
             setDiscoverNiche={setDiscoverNiche}
+            liveSearchQuery={liveSearchQuery}
+            setLiveSearchQuery={setLiveSearchQuery}
             selectedLocalDiscoverIds={selectedLocalDiscoverIds}
             setSelectedLocalDiscoverIds={setSelectedLocalDiscoverIds}
             localDiscoverMatches={localDiscoverMatches}
@@ -2416,10 +2420,10 @@ export default function App() {
             preseededFounders={preseededFounders}
             isDiscovering={isDiscovering}
             discoveredLeads={discoveredLeads}
-            handleDiscoverFounders={handleDiscoverFounders}
+            handleDiscoverFounders={handleDiscoverLeads}
             selectedDiscoverIds={selectedDiscoverIds}
             setSelectedDiscoverIds={setSelectedDiscoverIds}
-            handleImportChecked={handleImportChecked}
+            handleImportChecked={handleImportDiscoveredLeads}
           />
         )}
 

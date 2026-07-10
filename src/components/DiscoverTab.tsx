@@ -9,6 +9,8 @@ interface DiscoverTabProps {
   setDiscoverTab: (tab: "database" | "live") => void;
   discoverNiche: string;
   setDiscoverNiche: (val: string) => void;
+  liveSearchQuery: string;
+  setLiveSearchQuery: (val: string) => void;
   selectedLocalDiscoverIds: string[];
   setSelectedLocalDiscoverIds: React.Dispatch<React.SetStateAction<string[]>>;
   localDiscoverMatches: any[];
@@ -28,6 +30,8 @@ export default function DiscoverTab({
   setDiscoverTab,
   discoverNiche,
   setDiscoverNiche,
+  liveSearchQuery,
+  setLiveSearchQuery,
   selectedLocalDiscoverIds,
   setSelectedLocalDiscoverIds,
   localDiscoverMatches,
@@ -251,15 +255,15 @@ export default function DiscoverTab({
               <div className="flex flex-col sm:flex-row gap-3">
                 <input 
                   type="text" 
-                  value={discoverNiche}
-                  onChange={(e) => setDiscoverNiche(e.target.value)}
+                  value={liveSearchQuery}
+                  onChange={(e) => setLiveSearchQuery(e.target.value)}
                   placeholder="e.g. D2C startup founders raising pre-seed in Mumbai"
                   className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-slate-400"
                   disabled={isDiscovering}
                 />
                 <button
                   onClick={handleDiscoverFounders}
-                  disabled={isDiscovering || !discoverNiche.trim()}
+                  disabled={isDiscovering || !liveSearchQuery.trim()}
                   className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-5 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer"
                 >
                   {isDiscovering ? (

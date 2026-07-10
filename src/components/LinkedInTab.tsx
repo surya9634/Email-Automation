@@ -3,7 +3,7 @@ import {
   Search, Linkedin, ExternalLink, Copy, Check, 
   Globe, AlertCircle, RefreshCw, Users, HelpCircle 
 } from "lucide-react";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, deleteField } from "firebase/firestore";
 import { db } from "../firebase";
 import { Founder } from "../types";
 
@@ -61,7 +61,7 @@ export default function LinkedInTab({
       const cleanUrl = url.trim();
       const ref = doc(db, "founders", id);
       await updateDoc(ref, {
-        linkedInUrl: cleanUrl || null,
+        linkedInUrl: cleanUrl || deleteField(),
         updatedAt: new Date().toISOString()
       });
       setFounders(prev => prev.map(f => f.id === id ? { ...f, linkedInUrl: cleanUrl || undefined } : f));
