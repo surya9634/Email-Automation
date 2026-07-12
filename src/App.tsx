@@ -19,7 +19,9 @@ import {
   signInWithRedirect,
   linkWithPopup,
   linkWithRedirect,
-  getRedirectResult
+  getRedirectResult,
+  reauthenticateWithPopup,
+  reauthenticateWithRedirect
 } from "firebase/auth";
 import { db, auth } from "./firebase";
 import { Founder, UserProfile } from "./types";
@@ -498,24 +500,28 @@ export default function App() {
       const tryPopup = async () => {
         let result;
         if (auth.currentUser) {
-          // Check if Google is already linked — if so, skip linkWithPopup and just sign in
-          const alreadyLinked = auth.currentUser.providerData.some(
-            p => p.providerId === "google.com"
-          );
-          if (alreadyLinked) {
-            result = await signInWithPopup(auth, provider);
-          } else {
-            try {
-              result = await linkWithPopup(auth.currentUser, provider);
-            } catch (linkErr: any) {
-              if (
-                linkErr.code === "auth/credential-already-in-use" ||
-                linkErr.code === "auth/provider-already-linked" ||
-                linkErr.code === "auth/email-already-in-use"
-              ) {
-                result = await signInWithPopup(auth, provider);
-              } else {
-                throw linkErr;
+          try {
+            result = await reauthenticateWithPopup(auth.currentUser, provider);
+          } catch (reauthErr: any) {
+            console.log("reauthenticateWithPopup failed, falling back to link/signIn", reauthErr);
+            const alreadyLinked = auth.currentUser.providerData.some(
+              p => p.providerId === "google.com"
+            );
+            if (alreadyLinked) {
+              result = await signInWithPopup(auth, provider);
+            } else {
+              try {
+                result = await linkWithPopup(auth.currentUser, provider);
+              } catch (linkErr: any) {
+                if (
+                  linkErr.code === "auth/credential-already-in-use" ||
+                  linkErr.code === "auth/provider-already-linked" ||
+                  linkErr.code === "auth/email-already-in-use"
+                ) {
+                  result = await signInWithPopup(auth, provider);
+                } else {
+                  throw linkErr;
+                }
               }
             }
           }
@@ -546,7 +552,11 @@ export default function App() {
           showSuccess("Popup blocked by browser. Redirecting to Google sign-in...");
           sessionStorage.setItem("gmail_redirect_pending", "1");
           if (auth.currentUser) {
-            await linkWithRedirect(auth.currentUser, provider);
+            try {
+              await reauthenticateWithRedirect(auth.currentUser, provider);
+            } catch (reauthErr: any) {
+              await linkWithRedirect(auth.currentUser, provider);
+            }
           } else {
             await signInWithRedirect(auth, provider);
           }
