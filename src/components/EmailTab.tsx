@@ -56,6 +56,9 @@ interface EmailTabProps {
   
   showOnboarding: boolean;
   setShowOnboarding: (val: boolean) => void;
+
+  onlyVerifiedEmails: boolean;
+  setOnlyVerifiedEmails: (val: boolean) => void;
 }
 
 export default function EmailTab({
@@ -104,7 +107,10 @@ export default function EmailTab({
   profile,
   
   showOnboarding,
-  setShowOnboarding
+  setShowOnboarding,
+
+  onlyVerifiedEmails,
+  setOnlyVerifiedEmails
 }: EmailTabProps) {
   
   // AI Personalization state
@@ -379,6 +385,18 @@ export default function EmailTab({
                     </>
                   )}
                 </p>
+                <div className="flex items-center gap-2 mt-2 select-none">
+                  <input
+                    type="checkbox"
+                    id="onlyVerifiedEmailsCheck"
+                    checked={onlyVerifiedEmails}
+                    onChange={(e) => setOnlyVerifiedEmails(e.target.checked)}
+                    className="w-3.5 h-3.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <label htmlFor="onlyVerifiedEmailsCheck" className="text-[10px] font-bold text-slate-500 cursor-pointer uppercase tracking-wider">
+                    🛡️ Only send to verified emails (reputation protection)
+                  </label>
+                </div>
               </div>
             </div>
 

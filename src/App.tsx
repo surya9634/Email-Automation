@@ -170,7 +170,7 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [sectorFilter, setSectorFilter] = useState("All");
   const [verificationFilter, setVerificationFilter] = useState("All");
-  const [onlyVerifiedEmails, setOnlyVerifiedEmails] = useState(true);
+  const [onlyVerifiedEmails, setOnlyVerifiedEmails] = useState(false);
   const isShootCancelled = React.useRef(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   
@@ -2435,6 +2435,8 @@ export default function App() {
             profile={profile}
             showOnboarding={showOnboarding}
             setShowOnboarding={setShowOnboarding}
+            onlyVerifiedEmails={onlyVerifiedEmails}
+            setOnlyVerifiedEmails={setOnlyVerifiedEmails}
           />
         )}
 
