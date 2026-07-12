@@ -489,6 +489,8 @@ export default function App() {
     try {
       const provider = new GoogleAuthProvider();
       provider.addScope("https://www.googleapis.com/auth/gmail.send");
+      provider.addScope("https://www.googleapis.com/auth/gmail.compose");
+      provider.addScope("https://mail.google.com/");
       provider.setCustomParameters({
         prompt: "consent select_account"
       });
