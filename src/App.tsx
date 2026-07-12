@@ -271,10 +271,16 @@ export default function App() {
   // Pick up Gmail token after a redirect-based auth (popup was blocked)
   useEffect(() => {
     if (sessionStorage.getItem("gmail_redirect_pending") !== "1") return;
-    getRedirectResult(auth).then((result) => {
+    getRedirectResult(auth).then(async (result) => {
       if (!result) return;
       const credential = GoogleAuthProvider.credentialFromResult(result);
       if (credential?.accessToken) {
+        const scopesOk = await checkGmailScopes(credential.accessToken);
+        if (!scopesOk) {
+          showError("Connected successfully, but you forgot to check the Gmail permissions checkbox! Disconnect and try again.");
+          sessionStorage.removeItem("gmail_redirect_pending");
+          return;
+        }
         setGmailAccessToken(credential.accessToken);
         setGmailUserEmail(result.user.email || "");
         sessionStorage.setItem("gmail_access_token", credential.accessToken);
@@ -485,6 +491,24 @@ export default function App() {
     return await response.json();
   };
 
+  const checkGmailScopes = async (accessToken: string): Promise<boolean> => {
+    try {
+      const infoRes = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${accessToken}`);
+      if (infoRes.ok) {
+        const info = await infoRes.json();
+        console.log("Scopes granted:", info.scope);
+        const scopesList = info.scope ? info.scope.split(" ") : [];
+        const hasSend = scopesList.includes("https://www.googleapis.com/auth/gmail.send");
+        const hasCompose = scopesList.includes("https://www.googleapis.com/auth/gmail.compose");
+        const hasFull = scopesList.includes("https://mail.google.com/");
+        return hasSend || hasCompose || hasFull;
+      }
+    } catch (e) {
+      console.error("Failed checking token scopes:", e);
+    }
+    return true; // fallback to true to avoid blocker on network glitch
+  };
+
   // Action to connect Gmail inbox with send scope
   const handleConnectGmail = async () => {
     setIsConnectingGmail(true);
@@ -535,6 +559,12 @@ export default function App() {
         const result = await tryPopup();
         const credential = GoogleAuthProvider.credentialFromResult(result);
         if (credential?.accessToken) {
+          const scopesOk = await checkGmailScopes(credential.accessToken);
+          if (!scopesOk) {
+            showError("Connected successfully, but you forgot to check the Gmail permissions checkbox! Disconnect and try again.");
+            setIsConnectingGmail(false);
+            return;
+          }
           setGmailAccessToken(credential.accessToken);
           setGmailUserEmail(result.user.email || "");
           sessionStorage.setItem("gmail_access_token", credential.accessToken);
