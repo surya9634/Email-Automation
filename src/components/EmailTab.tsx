@@ -371,7 +371,12 @@ export default function EmailTab({
                   {gmailAccessToken ? (
                     <>Connected as <span className="font-extrabold text-slate-700">{gmailUserEmail}</span>. Bulk campaigns will send from your account.</>
                   ) : (
-                    <>Currently in demo/simulation mode. Connect your Gmail to send genuine emails.</>
+                    <>
+                      Currently in demo/simulation mode. Connect your Gmail to send genuine emails.
+                      <div className="text-[9px] text-amber-600 font-extrabold mt-1 tracking-tight">
+                        ⚠️ CRUCIAL: You MUST check the checkbox to "Send emails on your behalf" on Google's consent screen, or sending will fail with a 403 error.
+                      </div>
+                    </>
                   )}
                 </p>
               </div>
